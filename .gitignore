@@ -1,0 +1,56 @@
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.buildlog/
+.history
+.svn/
+migrate_working_dir/
+
+# IntelliJ/IDEA related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# VSCode settings (comment out if you want to include them in the repository)
+.vscode/
+
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+/build/
+
+# Obfuscation related
+app.*.map.json
+
+# Symbolication related
+app.*.symbols
+
+# Android build artifacts
+/android/app/debug
+/android/app/profile
+/android/app/release
+
+# Firebase related
+.firebase.json
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist
+.firebaserc
+
+# macOS related
+**/DerivedData/
+**/.flutter-plugins
+**/xcuserdata/
+*.xcworkspace
+
+# Windows related
+**/windows/flutter/ephemeral/.plugin_symlinks
