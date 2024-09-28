@@ -11,7 +11,7 @@ This project is an ongoing Flutter application designed as a car-buying platform
 Here's a preview of **Autorizz - Car Buying App**:
 
 <p align="center">
-  <img src="assets/post.png" alt="App Screenshot 1" width="250"/>
+  <img src="assets/post.png" alt="App Screenshot 1" width="400"/>
 
 ---
 
