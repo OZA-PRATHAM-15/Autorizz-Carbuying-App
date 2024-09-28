@@ -54,4 +54,4 @@ ios/Runner/GoogleService-Info.plist
 
 # Windows related
 **/windows/flutter/ephemeral/.plugin_symlinks
-/lib/firebase_options.dart
+lib/firebase_options.dart
