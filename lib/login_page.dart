@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:car_buying_app/toast_utils.dart'; // Custom toast utils if you have
+import 'package:car_buying_app/toast_utils.dart';
 
 class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
+
   @override
   _LoginPageState createState() => _LoginPageState();
 }
@@ -16,14 +18,12 @@ class _LoginPageState extends State<LoginPage> {
   final _passwordController = TextEditingController();
   bool _isLoading = false;
 
-  // Automatically check if a user is logged in
   @override
   void initState() {
     super.initState();
     _checkIfLoggedIn();
   }
 
-  // Check if the user is already logged in
   void _checkIfLoggedIn() async {
     User? user = _auth.currentUser;
     if (user != null) {
@@ -53,7 +53,6 @@ class _LoginPageState extends State<LoginPage> {
     });
 
     try {
-      // Authenticate the user
       UserCredential userCredential = await _auth.signInWithEmailAndPassword(
         email: _emailController.text,
         password: _passwordController.text,
@@ -62,7 +61,6 @@ class _LoginPageState extends State<LoginPage> {
       User? user = userCredential.user;
 
       if (user != null) {
-        // Fetch the user data from Firestore
         DocumentSnapshot snapshot =
             await _firestore.collection('users').doc(user.uid).get();
         Map<String, dynamic>? userData =
@@ -71,15 +69,11 @@ class _LoginPageState extends State<LoginPage> {
         if (userData == null) {
           showCustomToast(context, "User data not found", true);
         } else {
-          // Check if the role is 'admin'
-          String role =
-              userData['role'] ?? 'user'; // Default to 'user' if no role
+          String role = userData['role'] ?? 'user';
 
           if (role == 'admin') {
-            // Redirect to the admin dashboard if the role is 'admin'
             Navigator.pushReplacementNamed(context, '/admin-dashboard');
           } else {
-            // Redirect to the regular user home page
             Navigator.pushReplacementNamed(context, '/home');
           }
         }
@@ -105,8 +99,8 @@ class _LoginPageState extends State<LoginPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Image.asset('assets/car_logo.png', width: 150),
-              SizedBox(height: 20),
-              Text(
+              const SizedBox(height: 20),
+              const Text(
                 'Login',
                 style: TextStyle(
                   color: Colors.white,
@@ -114,72 +108,71 @@ class _LoginPageState extends State<LoginPage> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              SizedBox(height: 40),
+              const SizedBox(height: 40),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 40),
                 child: TextField(
                   controller: _emailController,
-                  style: TextStyle(color: Colors.white),
+                  style: const TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     filled: true,
                     fillColor: Colors.blueGrey[700],
                     hintText: 'Email',
-                    hintStyle: TextStyle(
-                        color: const Color.fromARGB(137, 255, 255, 255)),
+                    hintStyle: const TextStyle(
+                        color: Color.fromARGB(137, 255, 255, 255)),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                       borderSide: BorderSide.none,
                     ),
-                    prefixIcon: Icon(Icons.email, color: Colors.white),
+                    prefixIcon: const Icon(Icons.email, color: Colors.white),
                   ),
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 40),
                 child: TextField(
                   controller: _passwordController,
                   obscureText: true,
-                  style: TextStyle(color: Colors.white),
+                  style: const TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     filled: true,
                     fillColor: Colors.blueGrey[700],
                     hintText: 'Password',
-                    hintStyle: TextStyle(color: Colors.white54),
+                    hintStyle: const TextStyle(color: Colors.white54),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                       borderSide: BorderSide.none,
                     ),
-                    prefixIcon: Icon(Icons.lock, color: Colors.white),
+                    prefixIcon: const Icon(Icons.lock, color: Colors.white),
                   ),
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               _isLoading
-                  ? CircularProgressIndicator()
+                  ? const CircularProgressIndicator()
                   : ElevatedButton(
                       onPressed: _login,
-                      child: Text('Login'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor:
                             const Color.fromARGB(255, 255, 255, 255),
-                        foregroundColor: Color.fromARGB(255, 0, 0, 0),
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 80, vertical: 15),
+                        foregroundColor: const Color.fromARGB(255, 0, 0, 0),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 80, vertical: 15),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
                       ),
+                      child: const Text('Login'),
                     ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               TextButton(
                 onPressed: () {
                   Navigator.pushNamed(context, '/register');
                 },
-                child: Text(
+                child: const Text(
                   'Don\'t have an account? Register',
-                  style: TextStyle(
-                      color: const Color.fromARGB(255, 255, 255, 255)),
+                  style: TextStyle(color: Color.fromARGB(255, 255, 255, 255)),
                 ),
               ),
             ],

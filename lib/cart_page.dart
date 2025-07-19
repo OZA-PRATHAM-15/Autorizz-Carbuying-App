@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'car_detail_page.dart'; // Assuming you have a CarDetailPage
 
 class CartPage extends StatefulWidget {
+  const CartPage({super.key});
+
   @override
   _CartPageState createState() => _CartPageState();
 }
@@ -17,7 +18,6 @@ class _CartPageState extends State<CartPage> {
     _calculateTotalPrice();
   }
 
-  // Function to calculate the total price by stripping the dollar sign
   Future<void> _calculateTotalPrice() async {
     User? currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser != null) {
@@ -28,22 +28,19 @@ class _CartPageState extends State<CartPage> {
           .get();
 
       double total = 0.0;
-      cartSnapshot.docs.forEach((doc) {
-        // Extract price as a string and remove any non-numeric characters, including dollar signs
+      for (var doc in cartSnapshot.docs) {
         String priceString = doc['price'].replaceAll(RegExp(r'[^0-9.]'), '');
 
-        // Convert the cleaned string to a double
         double? itemPrice = double.tryParse(priceString);
 
         if (itemPrice != null) {
           total += itemPrice;
         }
 
-        // Add the total price of add-ons
         if (doc['addonPriceTotal'] != null) {
           total += doc['addonPriceTotal'];
         }
-      });
+      }
 
       setState(() {
         totalPrice = total;
@@ -51,7 +48,6 @@ class _CartPageState extends State<CartPage> {
     }
   }
 
-  // Function to remove an item from the cart
   Future<void> _removeFromCart(String cartItemId) async {
     User? currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser != null) {
@@ -61,17 +57,16 @@ class _CartPageState extends State<CartPage> {
           .collection('cartItems')
           .doc(cartItemId)
           .delete();
-      _calculateTotalPrice(); // Recalculate total price after removal
+      _calculateTotalPrice();
     }
   }
 
-  // Function to show a bottom sheet with car details
   void _showDetailsBottomSheet(
       BuildContext context, Map<String, dynamic> cartItem) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.black, // Background color for the bottom sheet
-      shape: RoundedRectangleBorder(
+      backgroundColor: Colors.black,
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(20),
           topRight: Radius.circular(20),
@@ -84,7 +79,6 @@ class _CartPageState extends State<CartPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Car Image
                 ClipRRect(
                   borderRadius: BorderRadius.circular(12),
                   child: Image.network(
@@ -94,45 +88,41 @@ class _CartPageState extends State<CartPage> {
                     fit: BoxFit.cover,
                   ),
                 ),
-                SizedBox(height: 10),
-                // Car Name
+                const SizedBox(height: 10),
                 Text(
                   cartItem['name'] ?? 'No Name',
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                SizedBox(height: 10),
-                // Car Price
+                const SizedBox(height: 10),
                 Text(
                   cartItem['price'].contains('\$')
                       ? cartItem['price']
                       : '\$${cartItem['price']}',
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: Colors.greenAccent,
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                SizedBox(height: 10),
-                // Selected Color
+                const SizedBox(height: 10),
                 Text(
                   'Color: ${cartItem['selectedColor']}',
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 16,
                   ),
                 ),
-                SizedBox(height: 10),
-                // Add-ons
+                const SizedBox(height: 10),
                 if (cartItem['selectedAddons'] != null &&
                     cartItem['selectedAddons'].isNotEmpty)
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
+                      const Text(
                         'Add-ons:',
                         style: TextStyle(
                           color: Colors.white,
@@ -143,16 +133,16 @@ class _CartPageState extends State<CartPage> {
                       ...cartItem['selectedAddons'].map<Widget>((addon) {
                         return Text(
                           addon,
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: Colors.white70,
                             fontSize: 14,
                           ),
                         );
                       }).toList(),
-                      SizedBox(height: 10),
+                      const SizedBox(height: 10),
                       Text(
                         'Add-on Price: \$${cartItem['addonPriceTotal']}',
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: Colors.greenAccent,
                           fontSize: 16,
                         ),
@@ -173,7 +163,7 @@ class _CartPageState extends State<CartPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Row(
+        title: const Row(
           children: [
             SizedBox(width: 10),
             Text('Cart'),
@@ -183,7 +173,7 @@ class _CartPageState extends State<CartPage> {
         foregroundColor: Colors.white,
       ),
       body: currentUser == null
-          ? Center(child: Text('Please log in to view your cart'))
+          ? const Center(child: Text('Please log in to view your cart'))
           : Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -196,11 +186,11 @@ class _CartPageState extends State<CartPage> {
                         .snapshots(),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
-                        return Center(child: CircularProgressIndicator());
+                        return const Center(child: CircularProgressIndicator());
                       }
 
                       if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                        return Center(
+                        return const Center(
                           child: Text(
                             'Your cart is empty',
                             style: TextStyle(color: Colors.white),
@@ -226,7 +216,7 @@ class _CartPageState extends State<CartPage> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
+                      const Text(
                         'Total Price:',
                         style: TextStyle(
                           color: Colors.white,
@@ -234,8 +224,8 @@ class _CartPageState extends State<CartPage> {
                         ),
                       ),
                       Text(
-                        '\$${totalPrice.toStringAsFixed(2)}', // Display single dollar sign
-                        style: TextStyle(
+                        '\$${totalPrice.toStringAsFixed(2)}',
+                        style: const TextStyle(
                           color: Colors.greenAccent,
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -247,43 +237,38 @@ class _CartPageState extends State<CartPage> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: SizedBox(
-                    width: double.infinity, // Make button full-width
+                    width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: () {
-                        // Add checkout logic here
-                      },
-                      child: Text('Checkout'),
+                      onPressed: () {},
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.green,
                         foregroundColor: Colors.white,
-                        padding:
-                            EdgeInsets.symmetric(vertical: 20), // Larger button
-                        textStyle: TextStyle(fontSize: 18),
+                        padding: const EdgeInsets.symmetric(vertical: 20),
+                        textStyle: const TextStyle(fontSize: 18),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
                       ),
+                      child: const Text('Checkout'),
                     ),
                   ),
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
               ],
             ),
       backgroundColor: Colors.black,
     );
   }
 
-  // Widget for each cart item with delete and details button
   Widget _buildCartItem(Map<String, dynamic> cartItem, String cartItemId) {
     return Card(
-      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       color: const Color.fromARGB(255, 27, 27, 27),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(10.0),
         child: Row(
           children: [
-            // Car Image
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
               child: Image.network(
@@ -293,22 +278,20 @@ class _CartPageState extends State<CartPage> {
                 fit: BoxFit.cover,
               ),
             ),
-            SizedBox(width: 10),
-            // Car Details
+            const SizedBox(width: 10),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     cartItem['name'] ?? 'No Name',
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 15,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  SizedBox(height: 10),
-                  // Ensure we don't show two dollar signs
+                  const SizedBox(height: 10),
                   Text(
                     cartItem['price'],
                     style: TextStyle(
@@ -316,16 +299,15 @@ class _CartPageState extends State<CartPage> {
                       fontSize: 14,
                     ),
                   ),
-                  // Display Selected Add-ons if available
                   if (cartItem['selectedAddons'] != null &&
                       cartItem['selectedAddons'].isNotEmpty)
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        SizedBox(height: 8),
+                        const SizedBox(height: 8),
                         Text(
                           'Add-ons: ${cartItem['selectedAddons'].join(', ')}',
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: Colors.white70,
                             fontSize: 12,
                           ),
@@ -335,40 +317,37 @@ class _CartPageState extends State<CartPage> {
                 ],
               ),
             ),
-            // Buttons: Delete and Details side by side
             Column(
               children: [
                 Row(
                   children: [
-                    // Delete Button
                     ElevatedButton(
                       onPressed: () => _removeFromCart(cartItemId),
-                      child: Icon(Icons.delete, color: Colors.white),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.redAccent,
-                        padding:
-                            EdgeInsets.symmetric(vertical: 6, horizontal: 2),
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 6, horizontal: 2),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
+                      child: const Icon(Icons.delete, color: Colors.white),
                     ),
-                    SizedBox(width: 5),
-                    // Details Button
+                    const SizedBox(width: 5),
                     ElevatedButton(
                       onPressed: () {
                         _showDetailsBottomSheet(context, cartItem);
                       },
-                      child: Text('Details'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.blueAccent,
                         foregroundColor: Colors.white,
-                        padding:
-                            EdgeInsets.symmetric(vertical: 6, horizontal: 2),
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 6, horizontal: 2),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
+                      child: const Text('Details'),
                     ),
                   ],
                 ),

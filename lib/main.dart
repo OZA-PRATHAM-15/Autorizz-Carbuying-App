@@ -8,22 +8,24 @@ import 'edit_profile_page.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'search_content_page.dart';
-import 'admin-dashboard.dart';
+import 'admin_dashboard.dart';
 import 'cart_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:lottie/lottie.dart'; // Import Lottie package
+import 'package:lottie/lottie.dart';
 import 'onboarding_screen.dart';
-import 'package:shared_preferences/shared_preferences.dart'; // Import SharedPreferences
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -32,23 +34,24 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: AuthChecker(), // Check if user is already logged in
+      home: const AuthChecker(),
       routes: {
-        '/login': (context) => LoginPage(),
-        '/register': (context) => RegisterPage(),
-        '/home': (context) => HomePage(),
-        '/profile': (context) => ProfilePage(),
-        '/edit-profile': (context) => EditProfilePage(),
-        '/search_content_page': (context) => SearchContentPage(),
-        '/admin-dashboard': (context) => AdminDashboard(),
-        '/cart_page': (context) => CartPage(),
+        '/login': (context) => const LoginPage(),
+        '/register': (context) => const RegisterPage(),
+        '/home': (context) => const HomePage(),
+        '/profile': (context) => const ProfilePage(),
+        '/edit-profile': (context) => const EditProfilePage(),
+        '/search_content_page': (context) => const SearchContentPage(),
+        '/admin-dashboard': (context) => const AdminDashboard(),
+        '/cart_page': (context) => const CartPage(),
       },
     );
   }
 }
 
-// New Widget to Check if the User is Logged In and if it's their first time
 class AuthChecker extends StatefulWidget {
+  const AuthChecker({super.key});
+
   @override
   _AuthCheckerState createState() => _AuthCheckerState();
 }
@@ -62,13 +65,11 @@ class _AuthCheckerState extends State<AuthChecker> {
     _checkFirstTime();
   }
 
-  // Function to check if it's the user's first time
   Future<void> _checkFirstTime() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     bool? isFirstTime = prefs.getBool('isFirstTime');
 
     if (isFirstTime == null || isFirstTime == true) {
-      // First time, set to false after showing the onboarding
       setState(() {
         _isFirstTime = true;
       });
@@ -82,13 +83,13 @@ class _AuthCheckerState extends State<AuthChecker> {
   @override
   Widget build(BuildContext context) {
     if (_isFirstTime) {
-      return OnboardingScreen(); // Show the onboarding screen if it's the first time
+      return const OnboardingScreen();
     }
 
     User? user = FirebaseAuth.instance.currentUser;
 
     if (user == null) {
-      return LoginPage(); // If no user is logged in, show login page
+      return const LoginPage();
     } else {
       return FutureBuilder<DocumentSnapshot>(
         future:
@@ -99,7 +100,7 @@ class _AuthCheckerState extends State<AuthChecker> {
               backgroundColor: Colors.black,
               body: Center(
                 child: Lottie.asset(
-                  'assets/caranimation.json', // Path to your Lottie animation file
+                  'assets/caranimation.json',
                   width: 200,
                   height: 200,
                   fit: BoxFit.fill,
@@ -109,21 +110,21 @@ class _AuthCheckerState extends State<AuthChecker> {
           }
 
           if (!snapshot.hasData || snapshot.hasError) {
-            return LoginPage(); // In case of error, return to login
+            return const LoginPage();
           }
 
           final userData = snapshot.data!.data() as Map<String, dynamic>?;
 
           if (userData == null) {
-            return LoginPage();
+            return const LoginPage();
           }
 
           String role = userData['role'] ?? 'user';
 
           if (role == 'admin') {
-            return AdminDashboard();
+            return const AdminDashboard();
           } else {
-            return HomePage();
+            return const HomePage();
           }
         },
       );

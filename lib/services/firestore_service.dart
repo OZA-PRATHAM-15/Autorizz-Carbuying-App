@@ -1,23 +1,26 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 
 class FirestoreService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-  // Create or update a user document
   Future<void> setUserData(String uid, Map<String, dynamic> data) async {
     try {
       await _db.collection('users').doc(uid).set(data, SetOptions(merge: true));
     } catch (e) {
-      print('Error setting user data: $e');
+      if (kDebugMode) {
+        print('Error setting user data: $e');
+      }
     }
   }
 
-  // Get user data
   Future<DocumentSnapshot> getUserData(String uid) async {
     try {
       return await _db.collection('users').doc(uid).get();
     } catch (e) {
-      print('Error getting user data: $e');
+      if (kDebugMode) {
+        print('Error getting user data: $e');
+      }
       rethrow;
     }
   }

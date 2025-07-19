@@ -3,6 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class AdminDashboard extends StatefulWidget {
+  const AdminDashboard({super.key});
+
   @override
   _AdminDashboardState createState() => _AdminDashboardState();
 }
@@ -59,7 +61,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
         _colorsController.text.isEmpty ||
         _imageUrlController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please fill all fields')),
+        const SnackBar(content: Text('Please fill all fields')),
       );
       return;
     }
@@ -82,7 +84,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Car added successfully')),
+        const SnackBar(content: Text('Car added successfully')),
       );
 
       _nameController.clear();
@@ -117,17 +119,17 @@ class _AdminDashboardState extends State<AdminDashboard> {
       stream: FirebaseFirestore.instance.collection('users').snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
+          return const Center(child: CircularProgressIndicator());
         }
         if (snapshot.hasError) {
-          return Center(child: Text('Error fetching users'));
+          return const Center(child: Text('Error fetching users'));
         }
 
         final users = snapshot.data!.docs;
 
         return ListView.builder(
           shrinkWrap: true,
-          physics: NeverScrollableScrollPhysics(),
+          physics: const NeverScrollableScrollPhysics(),
           itemCount: users.length,
           itemBuilder: (context, index) {
             final user = users[index].data() as Map<String, dynamic>;
@@ -150,55 +152,56 @@ class _AdminDashboardState extends State<AdminDashboard> {
         children: [
           TextField(
             controller: _nameController,
-            decoration: InputDecoration(labelText: 'Car Name'),
+            decoration: const InputDecoration(labelText: 'Car Name'),
           ),
           TextField(
             controller: _priceController,
-            decoration: InputDecoration(labelText: 'Price'),
+            decoration: const InputDecoration(labelText: 'Price'),
           ),
           TextField(
             controller: _mileageController,
-            decoration: InputDecoration(labelText: 'Mileage'),
+            decoration: const InputDecoration(labelText: 'Mileage'),
           ),
           TextField(
             controller: _fuelTypeController,
-            decoration: InputDecoration(labelText: 'Fuel Type'),
+            decoration: const InputDecoration(labelText: 'Fuel Type'),
           ),
           TextField(
             controller: _transmissionController,
-            decoration: InputDecoration(labelText: 'Transmission'),
+            decoration: const InputDecoration(labelText: 'Transmission'),
           ),
           TextField(
             controller: _seatsController,
-            decoration: InputDecoration(labelText: 'Seats'),
+            decoration: const InputDecoration(labelText: 'Seats'),
           ),
           TextField(
             controller: _speedController,
-            decoration: InputDecoration(labelText: 'Speed'),
+            decoration: const InputDecoration(labelText: 'Speed'),
           ),
           TextField(
             controller: _colorsController,
-            decoration: InputDecoration(labelText: 'Colors (JSON format)'),
+            decoration:
+                const InputDecoration(labelText: 'Colors (JSON format)'),
           ),
           TextField(
             controller: _imageUrlController,
-            decoration: InputDecoration(labelText: 'Image URL'),
+            decoration: const InputDecoration(labelText: 'Image URL'),
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           _isLoading
-              ? Center(child: CircularProgressIndicator())
+              ? const Center(child: CircularProgressIndicator())
               : ElevatedButton(
                   onPressed: _addCar,
-                  child: Text('Add Car'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color.fromARGB(255, 255, 255, 255),
                     foregroundColor: const Color.fromARGB(255, 0, 0, 0),
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 100, vertical: 15),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 100, vertical: 15),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
+                  child: const Text('Add Car'),
                 ),
         ],
       ),
@@ -210,17 +213,17 @@ class _AdminDashboardState extends State<AdminDashboard> {
       stream: FirebaseFirestore.instance.collection('cars').snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
+          return const Center(child: CircularProgressIndicator());
         }
         if (snapshot.hasError) {
-          return Center(child: Text('Error fetching cars'));
+          return const Center(child: Text('Error fetching cars'));
         }
 
         final cars = snapshot.data!.docs;
 
         return ListView.builder(
           shrinkWrap: true,
-          physics: NeverScrollableScrollPhysics(),
+          physics: const NeverScrollableScrollPhysics(),
           itemCount: cars.length,
           itemBuilder: (context, index) {
             final car = cars[index].data() as Map<String, dynamic>;
@@ -253,7 +256,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text(
+          const Text(
             'Analytics Overview',
             style: TextStyle(
               color: Colors.white,
@@ -261,8 +264,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
               fontWeight: FontWeight.bold,
             ),
           ),
-          SizedBox(height: 30),
-          Text(
+          const SizedBox(height: 30),
+          const Text(
             'Total Users',
             style: TextStyle(
               color: Colors.white,
@@ -270,17 +273,17 @@ class _AdminDashboardState extends State<AdminDashboard> {
               fontWeight: FontWeight.bold,
             ),
           ),
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
           Text(
             totalUsers.toString(),
-            style: TextStyle(
+            style: const TextStyle(
               color: Colors.blue,
               fontSize: 40,
               fontWeight: FontWeight.bold,
             ),
           ),
-          SizedBox(height: 30),
-          Text(
+          const SizedBox(height: 30),
+          const Text(
             'Total Cars',
             style: TextStyle(
               color: Colors.white,
@@ -288,10 +291,10 @@ class _AdminDashboardState extends State<AdminDashboard> {
               fontWeight: FontWeight.bold,
             ),
           ),
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
           Text(
             totalCars.toString(),
-            style: TextStyle(
+            style: const TextStyle(
               color: Colors.green,
               fontSize: 40,
               fontWeight: FontWeight.bold,
@@ -313,7 +316,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
       case 3:
         return _buildAnalytics();
       default:
-        return Center(child: Text('Unknown Tab'));
+        return const Center(child: Text('Unknown Tab'));
     }
   }
 
@@ -322,14 +325,14 @@ class _AdminDashboardState extends State<AdminDashboard> {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           'Admin Dashboard',
           style: TextStyle(color: Colors.white),
         ),
         backgroundColor: Colors.black,
         actions: [
           IconButton(
-            icon: Icon(Icons.logout),
+            icon: const Icon(Icons.logout),
             onPressed: _signOut,
             tooltip: 'Sign Out',
           ),
@@ -370,7 +373,6 @@ class _AdminDashboardState extends State<AdminDashboard> {
     );
   }
 
-  // Custom widget for the navigation bar items with icon and text
   Widget _buildBottomBarItem({
     required IconData icon,
     required String label,
@@ -389,7 +391,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
             icon,
             color: _selectedTabIndex == index ? Colors.white : Colors.grey,
           ),
-          SizedBox(height: 4),
+          const SizedBox(height: 4),
           Text(
             label,
             style: TextStyle(

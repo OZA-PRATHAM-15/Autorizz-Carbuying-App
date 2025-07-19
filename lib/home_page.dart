@@ -7,12 +7,14 @@ import 'search_content_page.dart';
 import 'car_detail_page.dart';
 
 class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
   @override
   _HomePageState createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  int _selectedIndex = 0; // For BottomNavigationBar index
+  int _selectedIndex = 0;
 
   final String _heroImageUrl =
       'https://firebasestorage.googleapis.com/v0/b/carbuyingapp-4883c.appspot.com/o/car.png?alt=media&token=ff96b43e-fb84-4ec9-b2f7-508b541c04cc'; // Replace with your actual URL
@@ -29,8 +31,8 @@ class _HomePageState extends State<HomePage> {
               'assets/car_logo.png',
               height: 40,
             ),
-            SizedBox(width: 10),
-            Text(
+            const SizedBox(width: 10),
+            const Text(
               'Autorizz',
               style: TextStyle(color: Colors.white),
             ),
@@ -42,10 +44,10 @@ class _HomePageState extends State<HomePage> {
       body: IndexedStack(
         index: _selectedIndex,
         children: [
-          _buildHomePage(), // Your main content page
-          SearchContentPage(), // Placeholder for the Market page
-          CartPage(), // Placeholder for the Cart page
-          ProfilePage() // Placeholder for the Profile page
+          _buildHomePage(),
+          SearchContentPage(),
+          const CartPage(),
+          const ProfilePage()
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -59,7 +61,7 @@ class _HomePageState extends State<HomePage> {
             _selectedIndex = index;
           });
         },
-        items: [
+        items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
             label: 'Home',
@@ -81,14 +83,12 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // Home page content
   Widget _buildHomePage() {
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Hero Section with Gradient Overlay and Animated Text
-          Container(
+          SizedBox(
             height: 250,
             child: Stack(
               children: [
@@ -115,48 +115,45 @@ class _HomePageState extends State<HomePage> {
                 Positioned(
                   bottom: 20,
                   left: 20,
-                  right:
-                      20, // Ensure the text doesn't overflow the screen width
+                  right: 20,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       SizedBox(
-                        width:
-                            double.infinity, // Make sure text fits the screen
+                        width: double.infinity,
                         child: AnimatedTextKit(
                           animatedTexts: [
                             FadeAnimatedText(
                               'Find Your Perfect Car',
-                              textStyle: TextStyle(
+                              textStyle: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 28,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
                           ],
-                          repeatForever: true, // Loop animation indefinitely
+                          repeatForever: true,
                         ),
                       ),
-                      SizedBox(height: 10),
-                      Text(
+                      const SizedBox(height: 10),
+                      const Text(
                         'Browse our extensive collection and find the best deals.',
                         style: TextStyle(color: Colors.white70, fontSize: 16),
-                        maxLines: 2, // Restrict text to 2 lines
-                        overflow: TextOverflow.ellipsis, // Ellipsis if overflow
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      SizedBox(height: 10),
+                      const SizedBox(height: 10),
                       ElevatedButton(
                         onPressed: () {
                           setState(() {
-                            _selectedIndex =
-                                1; // Switch to SearchContentPage (Market)
+                            _selectedIndex = 1;
                           });
                         },
-                        child: Text('Browse Cars'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.white,
                           foregroundColor: Colors.black,
                         ),
+                        child: const Text('Browse Cars'),
                       ),
                     ],
                   ),
@@ -164,15 +161,13 @@ class _HomePageState extends State<HomePage> {
               ],
             ),
           ),
-          SizedBox(height: 20),
-
-          // Categories Section with Icons and Labels
+          const SizedBox(height: 15),
           Padding(
             padding: const EdgeInsets.all(14.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                const Text(
                   'Categories',
                   style: TextStyle(
                     color: Colors.white,
@@ -180,7 +175,7 @@ class _HomePageState extends State<HomePage> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 12),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
@@ -194,15 +189,13 @@ class _HomePageState extends State<HomePage> {
               ],
             ),
           ),
-          SizedBox(height: 10),
-
-          // Featured Car Section (Vertical Scroll)
+          const SizedBox(height: 12),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                const Text(
                   'Featured Cars',
                   style: TextStyle(
                     color: Colors.white,
@@ -210,7 +203,7 @@ class _HomePageState extends State<HomePage> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 12),
                 StreamBuilder<QuerySnapshot>(
                   stream:
                       FirebaseFirestore.instance.collection('cars').snapshots(),
@@ -219,11 +212,11 @@ class _HomePageState extends State<HomePage> {
                       return Center(child: Text('Error: ${snapshot.error}'));
                     }
                     if (snapshot.connectionState == ConnectionState.waiting) {
-                      return Center(child: CircularProgressIndicator());
+                      return const Center(child: CircularProgressIndicator());
                     }
 
                     if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                      return Center(
+                      return const Center(
                         child: Text(
                           'No featured cars available.',
                           style: TextStyle(color: Colors.white),
@@ -231,9 +224,16 @@ class _HomePageState extends State<HomePage> {
                       );
                     }
 
-                    return ListView.builder(
+                    return GridView.builder(
                       shrinkWrap: true,
-                      physics: NeverScrollableScrollPhysics(),
+                      physics: const NeverScrollableScrollPhysics(),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        mainAxisSpacing: 10,
+                        crossAxisSpacing: 10,
+                        childAspectRatio: 0.65,
+                      ),
                       itemCount: snapshot.data!.docs.length,
                       itemBuilder: (context, index) {
                         DocumentSnapshot doc = snapshot.data!.docs[index];
@@ -243,9 +243,10 @@ class _HomePageState extends State<HomePage> {
                         return _buildFeaturedCarCard(
                           carData['imageUrl'],
                           carData['name'],
-                          '${carData['speed']} km/h\n${carData['price']}',
-                          'Fuel: ${carData['fuelType']}',
-                          doc.id, // Car ID for navigation
+                          carData['speed'],
+                          carData['price'],
+                          carData['fuelType'],
+                          doc.id,
                         );
                       },
                     );
@@ -254,32 +255,27 @@ class _HomePageState extends State<HomePage> {
               ],
             ),
           ),
-          SizedBox(height: 30),
-
-          // Footer Section
+          const SizedBox(height: 35),
           _buildFooter(),
         ],
       ),
     );
   }
 
-  // Placeholder for other pages (Market, Cart, Profile)
   Widget _buildPlaceholder(String text) {
     return Center(
       child: Text(
         text,
-        style: TextStyle(color: Colors.white, fontSize: 24),
+        style: const TextStyle(color: Colors.white, fontSize: 24),
       ),
     );
   }
 
-  // Category Card Widget
   Widget _buildCategoryCard(IconData icon, String label) {
     return GestureDetector(
       onTap: () {
-        // Navigate to the Market page (SearchContentPage)
         setState(() {
-          _selectedIndex = 1; // Switch to SearchContentPage (Market)
+          _selectedIndex = 1;
         });
       },
       child: Card(
@@ -288,7 +284,7 @@ class _HomePageState extends State<HomePage> {
         ),
         elevation: 4,
         color: const Color.fromARGB(255, 27, 27, 27),
-        child: Container(
+        child: SizedBox(
           width: 80,
           height: 110,
           child: Column(
@@ -296,10 +292,10 @@ class _HomePageState extends State<HomePage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(icon, color: Colors.white, size: 40),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               Text(
                 label,
-                style: TextStyle(color: Colors.white, fontSize: 14),
+                style: const TextStyle(color: Colors.white, fontSize: 14),
               ),
             ],
           ),
@@ -308,73 +304,81 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // Redesigned Featured Car Card Widget based on your reference image
-  Widget _buildFeaturedCarCard(String? imageUrl, String? model, String? specs,
-      String? fuelType, String carId) {
+  Widget _buildFeaturedCarCard(String? imageUrl, String? model, String? speed,
+      String? price, String? fuelType, String carId) {
     return Card(
-      margin: EdgeInsets.symmetric(vertical: 10),
+      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
       color: const Color.fromARGB(255, 27, 27, 27),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      elevation: 5,
+      elevation: 1,
       child: Padding(
-        padding: const EdgeInsets.all(10),
-        child: Row(
+        padding: const EdgeInsets.all(5),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Car Image
             ClipRRect(
-              borderRadius: BorderRadius.circular(8), // Round image corners
+              borderRadius: BorderRadius.circular(8),
               child: Image.network(
                 imageUrl ?? 'https://via.placeholder.com/150',
                 height: 100,
-                width: 135,
-                fit: BoxFit.cover, // Adjusted to cover the entire box
+                width: double.infinity,
+                fit: BoxFit.cover,
               ),
             ),
-            SizedBox(width: 10),
-            // Car Details with button
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    model ?? 'Unknown Model',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  SizedBox(height: 5),
-                  Text(
-                    specs ?? 'Specifications not available',
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontSize: 16,
-                    ),
-                  ),
-                  SizedBox(height: 5),
-                  Text(
-                    fuelType ?? 'Fuel Type not available',
-                    style: TextStyle(
-                      color: Colors.white54,
-                      fontSize: 14,
-                    ),
-                  ),
-                ],
+            const SizedBox(height: 5),
+            Text(
+              model ?? 'Unknown Model',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
               ),
             ),
-            // "Details" Button
+            const SizedBox(height: 5),
+            Row(
+              children: [
+                const Icon(Icons.speed, color: Colors.white54, size: 18),
+                const SizedBox(width: 4),
+                Text(
+                  '$speed km/h',
+                  style: const TextStyle(color: Colors.white70, fontSize: 14),
+                ),
+              ],
+            ),
+            const SizedBox(height: 5),
+            Row(
+              children: [
+                const Icon(Icons.local_gas_station,
+                    color: Colors.white54, size: 16),
+                const SizedBox(width: 4),
+                Text(
+                  fuelType ?? 'N/A',
+                  style: const TextStyle(color: Colors.white70, fontSize: 14),
+                ),
+              ],
+            ),
+            const SizedBox(height: 5),
+            Text(
+              price ?? 'N/A',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 5),
             SizedBox(
-              width: 80, // Adjust the width of the button
-              child: ElevatedButton(
+              width: 200,
+              height: 35,
+              child: ElevatedButton.icon(
                 onPressed: () {
                   _showCarDetailsModal(context, carId);
                 },
-                child: Text('Details'),
+                label: const Text('Details', style: TextStyle(fontSize: 14)),
                 style: ElevatedButton.styleFrom(
                   foregroundColor: Colors.black,
                   backgroundColor: const Color.fromARGB(255, 255, 255, 255),
-                  padding: EdgeInsets.symmetric(vertical: 10),
+                  padding: const EdgeInsets.symmetric(vertical: 5),
                 ),
               ),
             ),
@@ -384,14 +388,12 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // Function to show car details popup modal
-  // Function to show car details popup modal without scrolling
   void _showCarDetailsModal(BuildContext context, String carId) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.black, // Set the background color to black
-      shape: RoundedRectangleBorder(
+      backgroundColor: Colors.black,
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (BuildContext context) {
@@ -401,28 +403,25 @@ class _HomePageState extends State<HomePage> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Close button
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
+                  const Text(
                     'Car Details',
                     style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white, // Adjust text color to white
+                      color: Colors.white,
                     ),
                   ),
                   IconButton(
-                    icon: Icon(Icons.close,
-                        color: Colors.white), // Adjust icon color
+                    icon: const Icon(Icons.close, color: Colors.white),
                     onPressed: () {
                       Navigator.pop(context);
                     },
                   ),
                 ],
               ),
-              // Car details fetched from Firebase
               FutureBuilder<DocumentSnapshot>(
                 future: FirebaseFirestore.instance
                     .collection('cars')
@@ -430,15 +429,15 @@ class _HomePageState extends State<HomePage> {
                     .get(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: CircularProgressIndicator());
+                    return const Center(child: CircularProgressIndicator());
                   }
                   if (snapshot.hasError) {
-                    return Center(
+                    return const Center(
                         child: Text('Error loading details.',
                             style: TextStyle(color: Colors.white)));
                   }
                   if (!snapshot.hasData || !snapshot.data!.exists) {
-                    return Center(
+                    return const Center(
                         child: Text('Car not found.',
                             style: TextStyle(color: Colors.white)));
                   }
@@ -448,40 +447,43 @@ class _HomePageState extends State<HomePage> {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Image.network(
-                        carData['imageUrl'],
-                        height: 200,
-                        width: double.infinity,
-                        fit: BoxFit.cover,
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: Image.network(
+                          carData['imageUrl'],
+                          height: 200,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                        ),
                       ),
-                      SizedBox(height: 16),
+                      const SizedBox(height: 16),
                       Text(
                         carData['name'] ?? 'Unknown Car',
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                         ),
                       ),
-                      SizedBox(height: 8),
+                      const SizedBox(height: 8),
                       Text(
                         carData['price'] ?? 'Price not available',
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 20,
                           color: Colors.white70,
                         ),
                       ),
-                      SizedBox(height: 16),
+                      const SizedBox(height: 16),
                       Text(
                         carData['details'] ?? 'No details available.',
-                        style: TextStyle(fontSize: 16, color: Colors.white70),
+                        style: const TextStyle(
+                            fontSize: 16, color: Colors.white70),
                       ),
                     ],
                   );
                 },
               ),
-              // "Buy Now" Button
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               Center(
                 child: ElevatedButton(
                   onPressed: () {
@@ -493,19 +495,20 @@ class _HomePageState extends State<HomePage> {
                       ),
                     );
                   },
-                  child: Text('Buy Now'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color.fromARGB(255, 255, 255, 255),
                     foregroundColor: Colors.black,
-                    padding: EdgeInsets.symmetric(
+                    padding: const EdgeInsets.symmetric(
                       vertical: 12,
                       horizontal: 24,
                     ),
-                    textStyle: TextStyle(fontSize: 18, color: Colors.white),
+                    textStyle:
+                        const TextStyle(fontSize: 18, color: Colors.white),
                   ),
+                  child: const Text('Buy Now'),
                 ),
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
             ],
           ),
         );
@@ -513,13 +516,12 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // Footer Section Widget
   Widget _buildFooter() {
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       color: const Color.fromARGB(255, 27, 27, 27),
       width: double.infinity,
-      child: Column(
+      child: const Column(
         children: [
           Text(
             'Autorizz - Your Ultimate Car Buying Experience',

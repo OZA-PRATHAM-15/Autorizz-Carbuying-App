@@ -3,15 +3,17 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'car_detail_page.dart';
 
 class SearchContentPage extends StatelessWidget {
+  const SearchContentPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: Text(
+        title: const Text(
           'Market',
           style: TextStyle(
-            color: Colors.white, // Set AppBar title to white
+            color: Colors.white,
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
@@ -21,7 +23,7 @@ class SearchContentPage extends StatelessWidget {
       ),
       body: Container(
         padding: const EdgeInsets.all(16.0),
-        color: Colors.black, // Set the background color to black
+        color: Colors.black,
         child: StreamBuilder<QuerySnapshot>(
           stream: FirebaseFirestore.instance.collection('cars').snapshots(),
           builder: (context, snapshot) {
@@ -31,10 +33,10 @@ class SearchContentPage extends StatelessWidget {
 
             switch (snapshot.connectionState) {
               case ConnectionState.waiting:
-                return Center(child: CircularProgressIndicator());
+                return const Center(child: CircularProgressIndicator());
               default:
                 if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                  return Center(
+                  return const Center(
                       child: Text('No cars found',
                           style: TextStyle(color: Colors.white)));
                 }
@@ -46,8 +48,7 @@ class SearchContentPage extends StatelessWidget {
                     Map<String, dynamic> carData =
                         doc.data() as Map<String, dynamic>;
 
-                    return _buildCarCard(
-                        carData, context, doc.id); // Passing document ID
+                    return _buildCarCard(carData, context, doc.id);
                   },
                 );
             }
@@ -59,24 +60,20 @@ class SearchContentPage extends StatelessWidget {
 
   Widget _buildCarCard(
       Map<String, dynamic> carData, BuildContext context, String docId) {
-    String imageUrl = carData['imageUrl'] ??
-        'https://via.placeholder.com/150'; // Default image if not available
+    String imageUrl = carData['imageUrl'] ?? 'https://via.placeholder.com/150';
     String carName = carData['name'] ?? 'Unknown';
     String carPrice = carData['price'] ?? 'Price not available';
-    String speed =
-        carData['speed'] ?? 'N/A'; // Add speed or any other additional info
+    String speed = carData['speed'] ?? 'N/A';
 
     return Card(
-      margin: EdgeInsets.symmetric(vertical: 10),
+      margin: const EdgeInsets.symmetric(vertical: 10),
       elevation: 5,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      color: const Color.fromARGB(
-          255, 0, 0, 0), // Dark card color to match black theme
+      color: const Color.fromARGB(255, 0, 0, 0),
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Row(
           children: [
-            // Car Image
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
               child: Image.network(
@@ -86,49 +83,47 @@ class SearchContentPage extends StatelessWidget {
                 fit: BoxFit.cover,
               ),
             ),
-            SizedBox(width: 16),
-            // Car Information
+            const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     carName,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white, // White text for car name
+                      color: Colors.white,
                     ),
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   Text(
                     '$speed km/h | $carPrice',
                     style: TextStyle(
                       fontSize: 12,
-                      color: Colors.grey[400], // Grey for secondary text
+                      color: Colors.grey[400],
                     ),
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   Row(
                     children: [
-                      Icon(Icons.directions_car, size: 16, color: Colors.blue),
-                      SizedBox(width: 5),
+                      const Icon(Icons.directions_car,
+                          size: 16, color: Colors.blue),
+                      const SizedBox(width: 5),
                       Text(
                         'Fuel Type: ${carData['fuelType'] ?? 'Unknown'}',
-                        style: TextStyle(
-                            color: Colors.white, fontSize: 12), // White text
+                        style:
+                            const TextStyle(color: Colors.white, fontSize: 12),
                       ),
                     ],
                   ),
                 ],
               ),
             ),
-            // Button to go to details
             Align(
               alignment: Alignment.centerRight,
               child: ElevatedButton(
                 onPressed: () {
-                  // Navigate to car detail page
                   Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -136,13 +131,13 @@ class SearchContentPage extends StatelessWidget {
                     ),
                   );
                 },
-                child: Text('Details'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color.fromARGB(255, 255, 255, 255),
-                  foregroundColor: const Color.fromARGB(
-                      255, 0, 0, 0), // White text for button
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  foregroundColor: const Color.fromARGB(255, 0, 0, 0),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 ),
+                child: const Text('Details'),
               ),
             )
           ],

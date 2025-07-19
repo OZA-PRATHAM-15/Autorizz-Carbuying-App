@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class EditProfilePage extends StatefulWidget {
+  const EditProfilePage({super.key});
+
   @override
   _EditProfilePageState createState() => _EditProfilePageState();
 }
@@ -52,7 +54,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
         });
 
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Profile updated successfully')),
+          const SnackBar(content: Text('Profile updated successfully')),
         );
         Navigator.pop(context);
       } catch (e) {
@@ -68,7 +70,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           'Edit Profile',
           style: TextStyle(color: Colors.white),
         ),
@@ -84,18 +86,19 @@ class _EditProfilePageState extends State<EditProfilePage> {
             _buildTextField('Address', _addressController),
             _buildTextField('Birthdate', _birthdateController),
             _buildTextField('Gender', _genderController),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: _updateProfile,
-              child: Text('Save Changes'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color.fromARGB(255, 255, 255, 255),
                 foregroundColor: Colors.black,
-                padding: EdgeInsets.symmetric(horizontal: 80, vertical: 15),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 80, vertical: 15),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
+              child: const Text('Save Changes'),
             ),
           ],
         ),
@@ -108,12 +111,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
       padding: const EdgeInsets.only(bottom: 16.0),
       child: TextField(
         controller: controller,
-        style: TextStyle(color: Colors.white),
+        style: const TextStyle(color: Colors.white),
         decoration: InputDecoration(
           filled: true,
           fillColor: Colors.blueGrey[700],
           labelText: label,
-          labelStyle: TextStyle(color: Colors.white54),
+          labelStyle: const TextStyle(color: Colors.white54),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
             borderSide: BorderSide.none,

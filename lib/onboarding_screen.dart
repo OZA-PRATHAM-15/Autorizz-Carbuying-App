@@ -3,6 +3,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:lottie/lottie.dart';
 
 class OnboardingScreen extends StatefulWidget {
+  const OnboardingScreen({super.key});
+
   @override
   _OnboardingScreenState createState() => _OnboardingScreenState();
 }
@@ -32,23 +34,45 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF000000), // Black background
-      body: PageView.builder(
-        controller: _pageController,
-        onPageChanged: (int page) {
-          setState(() {
-            _currentPage = page;
-          });
-        },
-        itemCount: _titles.length,
-        itemBuilder: (context, index) {
-          return _buildPageContent(
-            title: _titles[index],
-            description: _descriptions[index],
-            lottieAnimation: _lottieAnimations[index],
-            isLastPage: index == _titles.length - 1,
-          );
-        },
+      backgroundColor: const Color(0xFF000000),
+      body: Column(
+        children: [
+          Expanded(
+            child: PageView.builder(
+              controller: _pageController,
+              onPageChanged: (int page) {
+                setState(() {
+                  _currentPage = page;
+                });
+              },
+              itemCount: _titles.length,
+              itemBuilder: (context, index) {
+                return _buildPageContent(
+                  title: _titles[index],
+                  description: _descriptions[index],
+                  lottieAnimation: _lottieAnimations[index],
+                  isLastPage: index == _titles.length - 1,
+                );
+              },
+            ),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(_titles.length, (index) {
+              return AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 16),
+                width: _currentPage == index ? 16 : 8,
+                height: 8,
+                decoration: BoxDecoration(
+                  color:
+                      _currentPage == index ? Colors.white : Colors.grey[600],
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              );
+            }),
+          ),
+        ],
       ),
     );
   }
@@ -62,23 +86,23 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
         Lottie.asset(
           lottieAnimation,
           width: 300,
           height: 300,
         ),
-        SizedBox(height: 40),
+        const SizedBox(height: 40),
         Text(
           title,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.bold,
             color: Colors.white,
           ),
           textAlign: TextAlign.center,
         ),
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 40),
           child: Text(
@@ -90,59 +114,54 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             textAlign: TextAlign.center,
           ),
         ),
-        SizedBox(height: 60),
+        const SizedBox(height: 60),
         AnimatedSwitcher(
-          duration: Duration(milliseconds: 300),
+          duration: const Duration(milliseconds: 300),
           child: isLastPage ? _buildStartButton() : _buildNextPageButton(),
         ),
       ],
     );
   }
 
-  // Button to move to the next page
   Widget _buildNextPageButton() {
     return ElevatedButton(
       onPressed: () {
         _pageController.nextPage(
-          duration: Duration(milliseconds: 300),
+          duration: const Duration(milliseconds: 300),
           curve: Curves.easeInOut,
         );
       },
       style: ElevatedButton.styleFrom(
-        backgroundColor: const Color.fromARGB(
-            255, 255, 255, 255), // Green color for next button
-        padding: EdgeInsets.symmetric(horizontal: 100, vertical: 20),
+        backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+        padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 20),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(30),
         ),
       ),
-      child: Text(
+      child: const Text(
         'Next',
         style: TextStyle(fontSize: 18, color: Colors.black),
       ),
     );
   }
 
-  // Button to finish the onboarding process
   Widget _buildStartButton() {
     return ElevatedButton(
       onPressed: _completeOnboarding,
       style: ElevatedButton.styleFrom(
-        backgroundColor: const Color.fromARGB(
-            255, 255, 255, 255), // Golden color for start button
-        padding: EdgeInsets.symmetric(horizontal: 100, vertical: 20),
+        backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+        padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 20),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(30),
         ),
       ),
-      child: Text(
+      child: const Text(
         'Get Started',
         style: TextStyle(fontSize: 18, color: Colors.black),
       ),
     );
   }
 
-  // Complete the onboarding process and navigate to the login screen
   Future<void> _completeOnboarding() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setBool('isFirstTime', false);
