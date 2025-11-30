@@ -31,7 +31,6 @@ class _ProfilePageState extends State<ProfilePage> {
         if (kDebugMode) {
           print('User Data: $userData');
         }
-
         setState(() {
           _userData = userData;
         });
@@ -41,6 +40,53 @@ class _ProfilePageState extends State<ProfilePage> {
         }
       }
     }
+  }
+
+  Future<bool?> _showSignOutDialog() {
+    return showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: const Color(0xFF121212),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: const Text(
+            'Sign Out',
+            style: TextStyle(color: Colors.white),
+          ),
+          content: const Text(
+            'Are you sure you want to sign out?',
+            style: TextStyle(color: Colors.white70),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+              child: const Text(
+                'Cancel',
+                style: TextStyle(color: Colors.white70),
+              ),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.redAccent,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop(true);
+              },
+              child: const Text('Confirm'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -105,20 +151,27 @@ class _ProfilePageState extends State<ProfilePage> {
                 _buildProfileItem(
                     Icons.person_outline, 'Gender', _userData!['gender']),
                 Divider(color: Colors.grey[800], thickness: 1, height: 40),
-                _buildActionItem(Icons.edit, 'Edit Profile', () {
-                  Navigator.pushNamed(context, '/edit-profile');
+                _buildActionItem(Icons.edit, 'Edit Profile', () async {
+                  final updated =
+                      await Navigator.pushNamed(context, '/edit-profile');
+                  if (updated == true) {
+                    _loadUserData();
+                  }
                 }),
                 _buildActionItem(Icons.history, 'Order History', () {}),
                 _buildActionItem(Icons.credit_card, 'Payment Methods', () {}),
                 const SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: () async {
-                    await FirebaseAuth.instance.signOut();
-                    Navigator.pushReplacementNamed(context, '/login');
+                    final shouldSignOut = await _showSignOutDialog();
+                    if (shouldSignOut == true) {
+                      await FirebaseAuth.instance.signOut();
+                      Navigator.pushReplacementNamed(context, '/login');
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color.fromARGB(255, 42, 42, 42),
-                    foregroundColor: const Color.fromARGB(255, 255, 255, 255),
+                    foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(
                         horizontal: 80, vertical: 15),
                     shape: RoundedRectangleBorder(
@@ -137,7 +190,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Widget _buildProfileItem(IconData icon, String title, String? value) {
     return ListTile(
-      leading: Icon(icon, color: const Color.fromARGB(255, 255, 255, 255)),
+      leading: Icon(icon, color: Colors.white),
       title: Text(
         title,
         style: const TextStyle(color: Colors.white, fontSize: 18),
@@ -151,7 +204,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Widget _buildActionItem(IconData icon, String title, VoidCallback onTap) {
     return ListTile(
-      leading: Icon(icon, color: const Color.fromARGB(255, 255, 255, 255)),
+      leading: Icon(icon, color: Colors.white),
       title: Text(
         title,
         style: const TextStyle(color: Colors.white, fontSize: 18),

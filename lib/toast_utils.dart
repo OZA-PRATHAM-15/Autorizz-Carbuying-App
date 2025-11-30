@@ -28,7 +28,7 @@ void showCustomToast(BuildContext context, String message, bool isError,
     reverseAnimationCurve: Curves.easeInBack,
     boxShadows: [
       BoxShadow(
-        color: Colors.black.withOpacity(0.3),
+        color: Colors.black.withAlpha((0.3 * 255).toInt()),
         offset: const Offset(0, 4),
         blurRadius: 12,
       ),
@@ -46,7 +46,7 @@ void showCustomToast(BuildContext context, String message, bool isError,
             onPressed: onActionPressed,
             style: TextButton.styleFrom(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              backgroundColor: Colors.black.withOpacity(0.2),
+              backgroundColor: Colors.black.withAlpha((0.2 * 255).toInt()),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               ),

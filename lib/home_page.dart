@@ -45,7 +45,7 @@ class _HomePageState extends State<HomePage> {
         index: _selectedIndex,
         children: [
           _buildHomePage(),
-          SearchContentPage(),
+          const SearchContentPage(),
           const CartPage(),
           const ProfilePage()
         ],
@@ -103,7 +103,7 @@ class _HomePageState extends State<HomePage> {
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         colors: [
-                          Colors.black.withOpacity(0.7),
+                          Colors.black.withAlpha((0.7 * 255).toInt()),
                           Colors.transparent
                         ],
                         begin: Alignment.bottomCenter,
@@ -189,7 +189,7 @@ class _HomePageState extends State<HomePage> {
               ],
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Column(
@@ -232,7 +232,7 @@ class _HomePageState extends State<HomePage> {
                         crossAxisCount: 2,
                         mainAxisSpacing: 10,
                         crossAxisSpacing: 10,
-                        childAspectRatio: 0.65,
+                        childAspectRatio: 0.68,
                       ),
                       itemCount: snapshot.data!.docs.length,
                       itemBuilder: (context, index) {
@@ -255,7 +255,7 @@ class _HomePageState extends State<HomePage> {
               ],
             ),
           ),
-          const SizedBox(height: 35),
+          const SizedBox(height: 30),
           _buildFooter(),
         ],
       ),

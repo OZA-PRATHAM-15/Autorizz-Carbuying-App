@@ -190,7 +190,7 @@ class _CarDetailPageState extends State<CarDetailPage> {
                         ),
                         const SizedBox(height: 8),
                         Wrap(
-                          spacing: 10,
+                          spacing: 15,
                           runSpacing: 10,
                           children: addons.keys.map((addonKey) {
                             var addon = addons[addonKey];
@@ -221,7 +221,8 @@ class _CarDetailPageState extends State<CarDetailPage> {
                                     width: 2,
                                   ),
                                   color: isSelected
-                                      ? Colors.green.withOpacity(0.1)
+                                      ? Colors.green
+                                          .withAlpha((0.1 * 255).toInt())
                                       : Colors.grey[800],
                                 ),
                                 padding: const EdgeInsets.all(10),

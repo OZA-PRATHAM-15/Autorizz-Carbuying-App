@@ -65,7 +65,8 @@ class _CartPageState extends State<CartPage> {
       BuildContext context, Map<String, dynamic> cartItem) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.black,
+      backgroundColor: const Color.fromARGB(255, 44, 44, 44),
+      isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(20),
@@ -73,85 +74,100 @@ class _CartPageState extends State<CartPage> {
         ),
       ),
       builder: (BuildContext context) {
-        return Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Image.network(
-                    cartItem['imageUrl'],
-                    height: 200,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  cartItem['name'] ?? 'No Name',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  cartItem['price'].contains('\$')
-                      ? cartItem['price']
-                      : '\$${cartItem['price']}',
-                  style: const TextStyle(
-                    color: Colors.greenAccent,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  'Color: ${cartItem['selectedColor']}',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                if (cartItem['selectedAddons'] != null &&
-                    cartItem['selectedAddons'].isNotEmpty)
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Add-ons:',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
+        return Stack(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 40),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.network(
+                        cartItem['imageUrl'],
+                        height: 200,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
                       ),
-                      ...cartItem['selectedAddons'].map<Widget>((addon) {
-                        return Text(
-                          addon,
-                          style: const TextStyle(
-                            color: Colors.white70,
-                            fontSize: 14,
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      cartItem['name'] ?? 'No Name',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      cartItem['price'].contains('\$')
+                          ? cartItem['price']
+                          : '\$${cartItem['price']}',
+                      style: const TextStyle(
+                        color: Colors.greenAccent,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      'Color: ${cartItem['selectedColor']}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    if (cartItem['selectedAddons'] != null &&
+                        cartItem['selectedAddons'].isNotEmpty)
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Add-ons:',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        );
-                      }).toList(),
-                      const SizedBox(height: 10),
-                      Text(
-                        'Add-on Price: \$${cartItem['addonPriceTotal']}',
-                        style: const TextStyle(
-                          color: Colors.greenAccent,
-                          fontSize: 16,
-                        ),
+                          ...cartItem['selectedAddons'].map<Widget>((addon) {
+                            return Text(
+                              addon,
+                              style: const TextStyle(
+                                color: Colors.white70,
+                                fontSize: 14,
+                              ),
+                            );
+                          }).toList(),
+                          const SizedBox(height: 10),
+                          Text(
+                            'Add-on Price: \$${cartItem['addonPriceTotal']}',
+                            style: const TextStyle(
+                              color: Colors.greenAccent,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-              ],
+                  ],
+                ),
+              ),
             ),
-          ),
+            Positioned(
+              top: 5,
+              right: 5,
+              child: IconButton(
+                icon: const Icon(Icons.close, color: Colors.white, size: 28),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+            ),
+          ],
         );
       },
     );
@@ -243,7 +259,7 @@ class _CartPageState extends State<CartPage> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.green,
                         foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 20),
+                        padding: const EdgeInsets.symmetric(vertical: 15),
                         textStyle: const TextStyle(fontSize: 18),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
@@ -321,18 +337,6 @@ class _CartPageState extends State<CartPage> {
               children: [
                 Row(
                   children: [
-                    ElevatedButton(
-                      onPressed: () => _removeFromCart(cartItemId),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.redAccent,
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 6, horizontal: 2),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: const Icon(Icons.delete, color: Colors.white),
-                    ),
                     const SizedBox(width: 5),
                     ElevatedButton(
                       onPressed: () {
@@ -348,6 +352,14 @@ class _CartPageState extends State<CartPage> {
                         ),
                       ),
                       child: const Text('Details'),
+                    ),
+                    const SizedBox(width: 8),
+                    IconButton(
+                      onPressed: () => _removeFromCart(cartItemId),
+                      icon: const Icon(Icons.delete),
+                      color: Colors.redAccent,
+                      iconSize: 28,
+                      tooltip: "Remove from cart",
                     ),
                   ],
                 ),

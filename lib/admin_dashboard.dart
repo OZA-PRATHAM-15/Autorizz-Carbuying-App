@@ -44,10 +44,39 @@ class _AdminDashboardState extends State<AdminDashboard> {
         totalCars = carsSnapshot.docs.length;
       });
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error fetching analytics data: $e')),
       );
     }
+  }
+
+  bool _validateNumericFields() {
+    if (double.tryParse(_priceController.text.trim()) == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a valid numeric price')),
+      );
+      return false;
+    }
+    if (double.tryParse(_mileageController.text.trim()) == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a valid numeric mileage')),
+      );
+      return false;
+    }
+    if (int.tryParse(_seatsController.text.trim()) == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a valid number of seats')),
+      );
+      return false;
+    }
+    if (double.tryParse(_speedController.text.trim()) == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a valid numeric speed')),
+      );
+      return false;
+    }
+    return true;
   }
 
   Future<void> _addCar() async {
@@ -66,21 +95,26 @@ class _AdminDashboardState extends State<AdminDashboard> {
       return;
     }
 
+    if (!_validateNumericFields()) {
+      return;
+    }
+
     setState(() {
       _isLoading = true;
     });
 
     try {
       await FirebaseFirestore.instance.collection('cars').add({
-        'name': _nameController.text,
-        'price': _priceController.text,
-        'mileage': _mileageController.text,
-        'fuelType': _fuelTypeController.text,
-        'transmission': _transmissionController.text,
-        'seats': _seatsController.text,
-        'speed': _speedController.text,
-        'colors': _colorsController.text,
-        'imageUrl': _imageUrlController.text,
+        'name': _nameController.text.trim(),
+        'price': _priceController.text.trim(),
+        'mileage': _mileageController.text.trim(),
+        'fuelType': _fuelTypeController.text.trim(),
+        'transmission': _transmissionController.text.trim(),
+        'seats': _seatsController.text.trim(),
+        'speed': _speedController.text.trim(),
+        'colors': _colorsController.text.trim(),
+        'imageUrl': _imageUrlController.text.trim(),
+        'createdAt': FieldValue.serverTimestamp(),
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -103,145 +137,565 @@ class _AdminDashboardState extends State<AdminDashboard> {
         SnackBar(content: Text('Failed to add car: $e')),
       );
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
-  Future<void> _signOut() async {
-    await FirebaseAuth.instance.signOut();
-    Navigator.pushReplacementNamed(context, '/login');
-  }
-
-  Widget _buildUserList() {
-    return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance.collection('users').snapshots(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        if (snapshot.hasError) {
-          return const Center(child: Text('Error fetching users'));
-        }
-
-        final users = snapshot.data!.docs;
-
-        return ListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: users.length,
-          itemBuilder: (context, index) {
-            final user = users[index].data() as Map<String, dynamic>;
-            return Card(
-              child: ListTile(
-                title: Text(user['name'] ?? 'No Name'),
-                subtitle: Text(user['email'] ?? 'No Email'),
-                trailing: Text(user['role'] ?? 'user'),
+  Future<bool?> _showSignOutDialog() {
+    return showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: const Color(0xFF121212),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: const Text(
+            'Sign Out',
+            style: TextStyle(color: Colors.white),
+          ),
+          content: const Text(
+            'Are you sure you want to sign out?',
+            style: TextStyle(color: Colors.white70),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+              child: const Text(
+                'Cancel',
+                style: TextStyle(color: Colors.white70),
               ),
-            );
-          },
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.redAccent,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop(true);
+              },
+              child: const Text('Confirm'),
+            ),
+          ],
         );
       },
     );
   }
 
+  Future<void> _signOut() async {
+    final shouldSignOut = await _showSignOutDialog();
+    if (shouldSignOut == true) {
+      await FirebaseAuth.instance.signOut();
+      if (!mounted) return;
+      Navigator.pushReplacementNamed(context, '/login');
+    }
+  }
+
+  Widget _buildUserList() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.grey[900],
+        borderRadius: BorderRadius.circular(16),
+      ),
+      padding: const EdgeInsets.all(12),
+      child: StreamBuilder<QuerySnapshot>(
+        stream: FirebaseFirestore.instance.collection('users').snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return const Center(
+                child: Text('Error fetching users',
+                    style: TextStyle(color: Colors.white)));
+          }
+
+          final users = snapshot.data!.docs;
+
+          if (users.isEmpty) {
+            return const Center(
+              child: Text(
+                'No users found',
+                style: TextStyle(color: Colors.white70),
+              ),
+            );
+          }
+
+          return ListView.separated(
+            itemCount: users.length,
+            separatorBuilder: (_, __) => const SizedBox(height: 8),
+            itemBuilder: (context, index) {
+              final user = users[index].data() as Map<String, dynamic>;
+              final name = user['name'] ?? 'No Name';
+              final email = user['email'] ?? 'No Email';
+              final role = (user['role'] ?? 'user').toString();
+              final initial = name.toString().isNotEmpty
+                  ? name.toString()[0].toUpperCase()
+                  : 'U';
+
+              Color roleColor;
+              if (role.toLowerCase() == 'admin') {
+                roleColor = Colors.orangeAccent;
+              } else {
+                roleColor = Colors.blueAccent;
+              }
+
+              return Container(
+                decoration: BoxDecoration(
+                  color: Colors.black,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      backgroundColor: Colors.grey[800],
+                      child: Text(
+                        initial,
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            name.toString(),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            email.toString(),
+                            style: const TextStyle(
+                              color: Colors.white70,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: roleColor.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: roleColor, width: 1),
+                      ),
+                      child: Text(
+                        role.toUpperCase(),
+                        style: TextStyle(
+                          color: roleColor,
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+
   Widget _buildAddCarForm() {
     return SingleChildScrollView(
-      child: Column(
-        children: [
-          TextField(
-            controller: _nameController,
-            decoration: const InputDecoration(labelText: 'Car Name'),
-          ),
-          TextField(
-            controller: _priceController,
-            decoration: const InputDecoration(labelText: 'Price'),
-          ),
-          TextField(
-            controller: _mileageController,
-            decoration: const InputDecoration(labelText: 'Mileage'),
-          ),
-          TextField(
-            controller: _fuelTypeController,
-            decoration: const InputDecoration(labelText: 'Fuel Type'),
-          ),
-          TextField(
-            controller: _transmissionController,
-            decoration: const InputDecoration(labelText: 'Transmission'),
-          ),
-          TextField(
-            controller: _seatsController,
-            decoration: const InputDecoration(labelText: 'Seats'),
-          ),
-          TextField(
-            controller: _speedController,
-            decoration: const InputDecoration(labelText: 'Speed'),
-          ),
-          TextField(
-            controller: _colorsController,
-            decoration:
-                const InputDecoration(labelText: 'Colors (JSON format)'),
-          ),
-          TextField(
-            controller: _imageUrlController,
-            decoration: const InputDecoration(labelText: 'Image URL'),
-          ),
-          const SizedBox(height: 20),
-          _isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : ElevatedButton(
-                  onPressed: _addCar,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromARGB(255, 255, 255, 255),
-                    foregroundColor: const Color.fromARGB(255, 0, 0, 0),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 100, vertical: 15),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.grey[900],
+          borderRadius: BorderRadius.circular(16),
+        ),
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            Row(
+              children: const [
+                Icon(Icons.directions_car, color: Colors.white),
+                SizedBox(width: 8),
+                Text(
+                  'Add New Car',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
                   ),
-                  child: const Text('Add Car'),
                 ),
-        ],
+              ],
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _nameController,
+              style: const TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                labelText: 'Car Name',
+                labelStyle: const TextStyle(color: Colors.white70),
+                prefixIcon:
+                    const Icon(Icons.directions_car, color: Colors.white70),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: const BorderSide(color: Colors.white24, width: 1),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: const BorderSide(color: Colors.white, width: 1.2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _priceController,
+              keyboardType: TextInputType.number,
+              style: const TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                labelText: 'Price (₹)',
+                labelStyle: const TextStyle(color: Colors.white70),
+                prefixIcon:
+                    const Icon(Icons.currency_rupee, color: Colors.white70),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: const BorderSide(color: Colors.white24, width: 1),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: const BorderSide(color: Colors.white, width: 1.2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _mileageController,
+              keyboardType: TextInputType.number,
+              style: const TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                labelText: 'Mileage (km/l)',
+                labelStyle: const TextStyle(color: Colors.white70),
+                prefixIcon: const Icon(Icons.speed, color: Colors.white70),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: const BorderSide(color: Colors.white24, width: 1),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: const BorderSide(color: Colors.white, width: 1.2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _fuelTypeController,
+              style: const TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                labelText: 'Fuel Type (Petrol/Diesel/EV)',
+                labelStyle: const TextStyle(color: Colors.white70),
+                prefixIcon:
+                    const Icon(Icons.local_gas_station, color: Colors.white70),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: const BorderSide(color: Colors.white24, width: 1),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: const BorderSide(color: Colors.white, width: 1.2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _transmissionController,
+              style: const TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                labelText: 'Transmission (Manual/Automatic)',
+                labelStyle: const TextStyle(color: Colors.white70),
+                prefixIcon: const Icon(Icons.settings, color: Colors.white70),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: const BorderSide(color: Colors.white24, width: 1),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: const BorderSide(color: Colors.white, width: 1.2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _seatsController,
+              keyboardType: TextInputType.number,
+              style: const TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                labelText: 'Seats',
+                labelStyle: const TextStyle(color: Colors.white70),
+                prefixIcon: const Icon(Icons.event_seat, color: Colors.white70),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: const BorderSide(color: Colors.white24, width: 1),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: const BorderSide(color: Colors.white, width: 1.2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _speedController,
+              keyboardType: TextInputType.number,
+              style: const TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                labelText: 'Top Speed (km/h)',
+                labelStyle: const TextStyle(color: Colors.white70),
+                prefixIcon: const Icon(Icons.flash_on, color: Colors.white70),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: const BorderSide(color: Colors.white24, width: 1),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: const BorderSide(color: Colors.white, width: 1.2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _colorsController,
+              style: const TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                labelText: 'Colors (JSON or comma separated)',
+                labelStyle: const TextStyle(color: Colors.white70),
+                prefixIcon: const Icon(Icons.palette, color: Colors.white70),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: const BorderSide(color: Colors.white24, width: 1),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: const BorderSide(color: Colors.white, width: 1.2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _imageUrlController,
+              style: const TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                labelText: 'Image URL',
+                labelStyle: const TextStyle(color: Colors.white70),
+                prefixIcon:
+                    const Icon(Icons.image_outlined, color: Colors.white70),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: const BorderSide(color: Colors.white24, width: 1),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: const BorderSide(color: Colors.white, width: 1.2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                TextButton(
+                  onPressed: _isLoading
+                      ? null
+                      : () {
+                          _nameController.clear();
+                          _priceController.clear();
+                          _mileageController.clear();
+                          _fuelTypeController.clear();
+                          _transmissionController.clear();
+                          _seatsController.clear();
+                          _speedController.clear();
+                          _colorsController.clear();
+                          _imageUrlController.clear();
+                        },
+                  child: const Text(
+                    'Clear Form',
+                    style: TextStyle(color: Colors.white70),
+                  ),
+                ),
+                const Spacer(),
+              ],
+            ),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _isLoading ? null : _addCar,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: Colors.black,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 100, vertical: 15),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                child: _isLoading
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.black),
+                        ),
+                      )
+                    : const Text('Add Car'),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildCarList() {
     return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance.collection('cars').snapshots(),
+      stream: FirebaseFirestore.instance
+          .collection('cars')
+          .orderBy('createdAt', descending: true)
+          .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         }
         if (snapshot.hasError) {
-          return const Center(child: Text('Error fetching cars'));
+          return const Center(
+              child: Text('Error fetching cars',
+                  style: TextStyle(color: Colors.white)));
         }
 
         final cars = snapshot.data!.docs;
 
-        return ListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
+        if (cars.isEmpty) {
+          return const Center(
+            child: Text(
+              'No cars found',
+              style: TextStyle(color: Colors.white70),
+            ),
+          );
+        }
+
+        return ListView.separated(
           itemCount: cars.length,
+          separatorBuilder: (_, __) => const SizedBox(height: 12),
           itemBuilder: (context, index) {
             final car = cars[index].data() as Map<String, dynamic>;
-            return Card(
-              child: ListTile(
-                leading: Image.network(car['imageUrl'], width: 50, height: 50),
-                title: Text(car['name'] ?? 'No Name'),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Price: ${car['price'] ?? 'No Price'}'),
-                    Text('Mileage: ${car['mileage'] ?? 'Unknown Mileage'}'),
-                    Text('Fuel Type: ${car['fuelType'] ?? 'Unknown Fuel'}'),
-                    Text(
-                        'Transmission: ${car['transmission'] ?? 'Unknown Transmission'}'),
-                    Text('Seats: ${car['seats'] ?? 'Unknown Seats'}'),
-                  ],
-                ),
+
+            final name = car['name'] ?? 'No Name';
+            final price = car['price'] ?? 'No Price';
+            final mileage = car['mileage'] ?? 'Unknown Mileage';
+            final fuelType = car['fuelType'] ?? 'Unknown Fuel';
+            final transmission = car['transmission'] ?? 'Unknown Transmission';
+            final seats = car['seats'] ?? 'Unknown Seats';
+            final speed = car['speed'] ?? 'Unknown Speed';
+            final imageUrl = car['imageUrl'] ?? '';
+
+            return Container(
+              decoration: BoxDecoration(
+                color: Colors.grey[900],
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ClipRRect(
+                    borderRadius:
+                        const BorderRadius.vertical(top: Radius.circular(16)),
+                    child: imageUrl.toString().isNotEmpty
+                        ? Image.network(
+                            imageUrl,
+                            height: 160,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Container(
+                                height: 160,
+                                color: Colors.black,
+                                child: const Center(
+                                  child: Icon(
+                                    Icons.broken_image,
+                                    color: Colors.white38,
+                                    size: 40,
+                                  ),
+                                ),
+                              );
+                            },
+                          )
+                        : Container(
+                            height: 160,
+                            color: Colors.black,
+                            child: const Center(
+                              child: Icon(
+                                Icons.directions_car_filled,
+                                color: Colors.white38,
+                                size: 40,
+                              ),
+                            ),
+                          ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          name.toString(),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '₹ $price',
+                          style: const TextStyle(
+                            color: Colors.greenAccent,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 4,
+                          children: [
+                            _buildInfoChip(
+                                Icons.local_gas_station, fuelType.toString()),
+                            _buildInfoChip(
+                                Icons.settings, transmission.toString()),
+                            _buildInfoChip(
+                                Icons.event_seat, '${seats.toString()} seats'),
+                            _buildInfoChip(
+                                Icons.speed, '${mileage.toString()} km/l'),
+                            _buildInfoChip(
+                                Icons.flash_on, '${speed.toString()} km/h'),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             );
           },
@@ -250,57 +704,108 @@ class _AdminDashboardState extends State<AdminDashboard> {
     );
   }
 
+  Widget _buildInfoChip(IconData icon, String label) {
+    return Chip(
+      backgroundColor: Colors.black,
+      shape: StadiumBorder(
+        side: BorderSide(color: Colors.white24),
+      ),
+      avatar: Icon(icon, size: 16, color: Colors.white70),
+      label: Text(
+        label,
+        style: const TextStyle(color: Colors.white70, fontSize: 12),
+      ),
+    );
+  }
+
   Widget _buildAnalytics() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          const Text(
-            'Analytics Overview',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
+    return Column(
+      children: [
+        Row(
+          children: [
+            const Text(
+              'Analytics Overview',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const Spacer(),
+            IconButton(
+              onPressed: _fetchAnalyticsData,
+              icon: const Icon(Icons.refresh, color: Colors.white70),
+              tooltip: 'Refresh',
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        Expanded(
+          child: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _buildStatCard(
+                      title: 'Total Users',
+                      value: totalUsers.toString(),
+                      icon: Icons.people,
+                      color: Colors.blueAccent,
+                    ),
+                    const SizedBox(width: 16),
+                    _buildStatCard(
+                      title: 'Total Cars',
+                      value: totalCars.toString(),
+                      icon: Icons.directions_car,
+                      color: Colors.greenAccent,
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 30),
-          const Text(
-            'Total Users',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStatCard({
+    required String title,
+    required String value,
+    required IconData icon,
+    required Color color,
+  }) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.grey[900],
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          children: [
+            Icon(icon, color: color, size: 32),
+            const SizedBox(height: 10),
+            Text(
+              title,
+              style: const TextStyle(
+                color: Colors.white70,
+                fontSize: 14,
+              ),
             ),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            totalUsers.toString(),
-            style: const TextStyle(
-              color: Colors.blue,
-              fontSize: 40,
-              fontWeight: FontWeight.bold,
+            const SizedBox(height: 8),
+            Text(
+              value,
+              style: TextStyle(
+                color: color,
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-          ),
-          const SizedBox(height: 30),
-          const Text(
-            'Total Cars',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            totalCars.toString(),
-            style: const TextStyle(
-              color: Colors.green,
-              fontSize: 40,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -316,7 +821,9 @@ class _AdminDashboardState extends State<AdminDashboard> {
       case 3:
         return _buildAnalytics();
       default:
-        return const Center(child: Text('Unknown Tab'));
+        return const Center(
+          child: Text('Unknown Tab', style: TextStyle(color: Colors.white)),
+        );
     }
   }
 
@@ -332,42 +839,47 @@ class _AdminDashboardState extends State<AdminDashboard> {
         backgroundColor: Colors.black,
         actions: [
           IconButton(
-            icon: const Icon(Icons.logout),
+            icon: const Icon(Icons.logout, color: Colors.white),
             onPressed: _signOut,
             tooltip: 'Sign Out',
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: _getSelectedTabContent(),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: _getSelectedTabContent(),
+        ),
       ),
       bottomNavigationBar: BottomAppBar(
         color: Colors.black,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _buildBottomBarItem(
-              icon: Icons.people,
-              label: 'View Users',
-              index: 0,
-            ),
-            _buildBottomBarItem(
-              icon: Icons.add_circle,
-              label: 'Add Car',
-              index: 1,
-            ),
-            _buildBottomBarItem(
-              icon: Icons.directions_car,
-              label: 'View Cars',
-              index: 2,
-            ),
-            _buildBottomBarItem(
-              icon: Icons.bar_chart,
-              label: 'Analytics',
-              index: 3,
-            ),
-          ],
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 1),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildBottomBarItem(
+                icon: Icons.people,
+                label: 'View Users',
+                index: 0,
+              ),
+              _buildBottomBarItem(
+                icon: Icons.add_circle,
+                label: 'Add Car',
+                index: 1,
+              ),
+              _buildBottomBarItem(
+                icon: Icons.directions_car,
+                label: 'View Cars',
+                index: 2,
+              ),
+              _buildBottomBarItem(
+                icon: Icons.bar_chart,
+                label: 'Analytics',
+                index: 3,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -378,6 +890,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
     required String label,
     required int index,
   }) {
+    final bool isSelected = _selectedTabIndex == index;
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -387,16 +900,27 @@ class _AdminDashboardState extends State<AdminDashboard> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            height: 3,
+            width: isSelected ? 24 : 0,
+            margin: const EdgeInsets.only(bottom: 4),
+            decoration: BoxDecoration(
+              color: isSelected ? Colors.white : Colors.transparent,
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
           Icon(
             icon,
-            color: _selectedTabIndex == index ? Colors.white : Colors.grey,
+            color: isSelected ? Colors.white : Colors.grey,
           ),
           const SizedBox(height: 4),
           Text(
             label,
             style: TextStyle(
-              color: _selectedTabIndex == index ? Colors.white : Colors.grey,
+              color: isSelected ? Colors.white : Colors.grey,
               fontSize: 12,
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
             ),
           ),
         ],
